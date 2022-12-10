@@ -362,9 +362,20 @@ static std::optional<struct timespec> get_boottime()
 
     if (ksrc != "")
       extra_flags = get_kernel_cflags(utsname.machine, ksrc, kobj);
+
+    auto zdir = std::string("/usr/src/zfs-") + utsname.release;
+    if (is_dir(zdir)) {
+      extra_flags.push_back("-include");
+      extra_flags.push_back(zdir + "/zfs_config.h");
+      extra_flags.push_back("-I" + zdir + "/include");
+      extra_flags.push_back("-I" + zdir + "/include/spl");
+    }
   }
+
   extra_flags.push_back("-include");
   extra_flags.push_back(CLANG_WORKAROUNDS_H);
+  extra_flags.push_back("-DCC_USING_FENTRY");
+
 
   for (auto dir : include_dirs)
   {
